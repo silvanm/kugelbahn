@@ -60,7 +60,8 @@ controls.autoRotate = true;      // langsame Kamerafahrt um die Bahn, per Knopf 
 controls.autoRotateSpeed = 0.5;  // 2 = 30 s pro Umlauf -> 2 min pro Umlauf
 controls.maxPolarAngle = Math.PI * 0.49;
 
-scene.add(new THREE.HemisphereLight(0xfff4e0, 0x30343c, 0.6));
+const hemi = new THREE.HemisphereLight(0xfff4e0, 0x30343c, 0.6);
+scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffffff, 2.2);
 sun.position.set(6, 14, 9);
 sun.castShadow = true;
@@ -87,4 +88,4 @@ const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const balls = [];                          // { body, mesh, rail?, held?, ... }
 const state = { paused: false, laps: 0 };
 
-export { R, W, T, RT, RH, WH, Y_TOP, H, MAX_BALLS, renderer, scene, camera, controls, world, ballMat, trackMat, sync, V, balls, state };
+export { R, W, T, RT, RH, WH, Y_TOP, H, MAX_BALLS, renderer, scene, camera, controls, hemi, sun, world, ballMat, trackMat, sync, V, balls, state };

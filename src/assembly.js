@@ -16,7 +16,7 @@ function startAssembly() {
   const box = new THREE.Box3(), parts = [], moving = [], bellParts = [];
   let board = null;
   for (const o of scene.children) {
-    if (!(o.isMesh || o.isGroup || o.isLine) || o.name === 'table' || balls.some((b) => b.mesh === o)) continue;
+    if (!(o.isMesh || o.isGroup || o.isLine) || o.name === 'table' || o.name === 'leds' || balls.some((b) => b.mesh === o)) continue;
     if (o.name === 'board') { board = o; continue; }
     if (last.has(o)) { bellParts.push(o); continue; }
     if (late.has(o)) { moving.push(o); continue; }

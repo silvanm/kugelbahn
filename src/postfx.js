@@ -4,6 +4,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { renderer, scene, camera, controls } from './core.js';
 
@@ -26,6 +27,10 @@ composer.addPass(gtao);
 const bokeh = new BokehPass(scene, camera, { focus: 20, aperture: 0.0004, maxblur: 0.006 });
 bokeh.enabled = false;   // standardmässig aus, per Knopf zuschaltbar
 composer.addPass(bokeh);
+// Leuchten der LEDs: nur sehr helle Pixel (über 1.0 im linearen Farbraum) strahlen über, im LED-Modus aktiv
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.6, 0.5, 1.1);
+bloom.enabled = false;
+composer.addPass(bloom);
 composer.addPass(new OutputPass());
 let focusDist = camera.position.distanceTo(controls.target);
 // Autofokus auf den Drehpunkt der Kamera (bzw. die verfolgte Kugel), weich nachgeführt
@@ -34,4 +39,4 @@ function updateFocus() {
   bokeh.uniforms.focus.value = focusDist;
 }
 
-export { composer, bokeh, updateFocus };
+export { composer, bokeh, bloom, updateFocus };

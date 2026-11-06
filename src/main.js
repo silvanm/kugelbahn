@@ -13,10 +13,12 @@ import { audio, audioSuspend, toggleSound, audioContacts, audioUpdate } from './
 import { held } from './interaction.js';
 import { startAssembly, building, assemblyApply, assemblyRestore } from './assembly.js';
 import { composer, bokeh, updateFocus } from './postfx.js';
+import { led, makeLights, setLed, updateLights } from './lights.js';
 import { cam, enableBallCam, disableBallCam, nextBallCam, updateBallCam } from './ballcam.js';
 
 // Grundplatte erst jetzt: ihre Grösse richtet sich nach allem, was bis hier in der Szene steht
 makeBase();
+makeLights();   // LED-Streifen richten sich nach der Grundplatte
 
 // ---------------------------------------------------------------- Ablauf
 function reset() {
@@ -69,6 +71,7 @@ function setBallCam(on) {
   $('ballcam').classList.toggle('on', on);
   $('nextBall').hidden = !on;
 }
+$('led').onclick = () => { setLed(!led.on); $('led').classList.toggle('on', led.on); };
 $('ballcam').onclick = () => setBallCam(!cam.active);
 $('nextBall').onclick = () => nextBallCam();
 addEventListener('keydown', (e) => { if (e.key === 'Escape' && cam.active) setBallCam(false); });
@@ -91,7 +94,7 @@ addEventListener('resize', () => {
 reset();
 startAssembly();
 // Debug-Zugriff (z. B. __kb.fastForward(60) simuliert 60 s ohne Rendering)
-window.__kb = { cam, updateBallCam, bell, composer, renderer, audio, world, CANNON, camera, controls, scene, acrylicDepth, balls, lift, rocker, railPts, LOOP, KICK, FUN2, get laps() { return state.laps; }, fastForward: (s) => { for (let i = 0; i < s / H; i++) physicsStep(); } };
+window.__kb = { finishAssembly: () => { assemblyApply(1e3); assemblyRestore(); }, led, setLed, updateLights, cam, updateBallCam, bell, composer, renderer, audio, world, CANNON, camera, controls, scene, acrylicDepth, balls, lift, rocker, railPts, LOOP, KICK, FUN2, get laps() { return state.laps; }, fastForward: (s) => { for (let i = 0; i < s / H; i++) physicsStep(); } };
 const clock = new THREE.Clock();
 let acc = 0;
 
@@ -119,6 +122,7 @@ renderer.setAnimationLoop(() => {
   $('nBalls').textContent = balls.length;
   $('phase').textContent = PH[lift.ph].label;
   $('laps').textContent = state.laps;
+  updateLights(dt, clock.elapsedTime, building());
   updateFocus();
   assemblyApply(dt);
   composer.render();
