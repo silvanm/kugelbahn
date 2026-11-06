@@ -13,6 +13,7 @@ import { audio, audioSuspend, toggleSound, audioContacts, audioUpdate } from './
 import { held } from './interaction.js';
 import { startAssembly, building, assemblyApply, assemblyRestore } from './assembly.js';
 import { composer, bokeh, updateFocus } from './postfx.js';
+import { cam, enableBallCam, disableBallCam, nextBallCam, updateBallCam } from './ballcam.js';
 
 // Grundplatte erst jetzt: ihre Grösse richtet sich nach allem, was bis hier in der Szene steht
 makeBase();
@@ -56,12 +57,22 @@ const $ = (id) => document.getElementById(id);
 $('add').onclick = () => { spawner.pending++; };
 $('pause').onclick = (e) => { state.paused = !state.paused; e.target.textContent = state.paused ? 'Weiter' : 'Pause'; e.target.classList.toggle('on', state.paused); audioSuspend(); };
 $('follow').onclick = (e) => {
+  if (cam.active) setBallCam(false);
   follow = !follow;
   if (follow && balls.length) followIdx = (followIdx + 1) % balls.length;
   e.target.classList.toggle('on', follow);
 };
 $('reset').onclick = reset;
-$('build').onclick = () => { reset(); startAssembly(); };
+// Kugelkamera: an/aus, „Nächste“ wechselt die Kugel, Esc beendet
+function setBallCam(on) {
+  if (on) { follow = false; $('follow').classList.remove('on'); enableBallCam(); } else disableBallCam();
+  $('ballcam').classList.toggle('on', on);
+  $('nextBall').hidden = !on;
+}
+$('ballcam').onclick = () => setBallCam(!cam.active);
+$('nextBall').onclick = () => nextBallCam();
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && cam.active) setBallCam(false); });
+$('build').onclick = () => { setBallCam(false); reset(); startAssembly(); };
 $('sound').onclick = async (e) => {
   const on = await toggleSound();
   e.target.classList.toggle('on', on);
@@ -80,7 +91,7 @@ addEventListener('resize', () => {
 reset();
 startAssembly();
 // Debug-Zugriff (z. B. __kb.fastForward(60) simuliert 60 s ohne Rendering)
-window.__kb = { bell, composer, renderer, audio, world, CANNON, camera, controls, scene, acrylicDepth, balls, lift, rocker, railPts, LOOP, KICK, FUN2, get laps() { return state.laps; }, fastForward: (s) => { for (let i = 0; i < s / H; i++) physicsStep(); } };
+window.__kb = { cam, updateBallCam, bell, composer, renderer, audio, world, CANNON, camera, controls, scene, acrylicDepth, balls, lift, rocker, railPts, LOOP, KICK, FUN2, get laps() { return state.laps; }, fastForward: (s) => { for (let i = 0; i < s / H; i++) physicsStep(); } };
 const clock = new THREE.Clock();
 let acc = 0;
 
@@ -102,7 +113,7 @@ renderer.setAnimationLoop(() => {
     tmp.set(b.x, b.y, b.z);
     controls.target.lerp(tmp, 0.08);
   }
-  controls.update(dt);
+  if (cam.active) updateBallCam(dt); else controls.update(dt);
   audioUpdate();
 
   $('nBalls').textContent = balls.length;

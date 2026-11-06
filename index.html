@@ -20,6 +20,7 @@
   button { background:#2c3038; color:var(--fg); border:1px solid #444a55; border-radius:8px; padding:6px 10px;
            font-size:13px; cursor:pointer; }
   button:hover { border-color:var(--accent); }
+  button[hidden] { display:none; }
   button.on { background:var(--accent); color:#1b1d22; border-color:var(--accent); }
   #hint { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:12px; opacity:.6; }
   #hud .head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
@@ -63,6 +64,8 @@
     <button id="add">+ Kugel</button>
     <button id="pause">Pause</button>
     <button id="follow">Kamera folgen</button>
+    <button id="ballcam">Kugelkamera</button>
+    <button id="nextBall" hidden>Nächste Kugel</button>
     <button id="reset">Zurücksetzen</button>
     <button id="build">Neu aufbauen</button>
     <button id="sound">🔇 Ton</button>
