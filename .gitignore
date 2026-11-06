@@ -1,0 +1,11 @@
+# Geheimnisse (ElevenLabs-API-Key)
+.env
+.env.*
+
+# Editor-Verlauf und Tooling (können Secrets mitschneiden)
+.history/
+.omc/
+
+# System / Abhängigkeiten
+.DS_Store
+node_modules/

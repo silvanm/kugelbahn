@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kugelbahn</title>
+<style>
+  :root { --fg:#f4f1ea; --bg:#1b1d22; --accent:#d9a521; }
+  html, body { margin:0; height:100%; overflow:hidden; background:var(--bg); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--fg); }
+  canvas { display:block; }
+  #hud { position:fixed; top:16px; left:16px; background:rgba(20,22,26,.72); backdrop-filter: blur(6px);
+         padding:14px 16px; border-radius:12px; min-width:220px; box-shadow:0 6px 24px rgba(0,0,0,.35); }
+  #hud h1 { margin:0 0 6px; font-size:18px; letter-spacing:.3px; }
+  #hud .row { font-size:13px; opacity:.85; margin:2px 0; }
+  #hud .row b { color:var(--accent); font-weight:600; }
+  #hud .btns { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  button { background:#2c3038; color:var(--fg); border:1px solid #444a55; border-radius:8px; padding:6px 10px;
+           font-size:13px; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button.on { background:var(--accent); color:#1b1d22; border-color:var(--accent); }
+  #hint { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:12px; opacity:.6; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+    "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="hud">
+  <h1>Kugelbahn</h1>
+  <div class="row">Kugeln: <b id="nBalls">0</b></div>
+  <div class="row">Lift: <b id="phase">–</b></div>
+  <div class="row">Runden: <b id="laps">0</b></div>
+  <div class="btns">
+    <button id="add">+ Kugel</button>
+    <button id="pause">Pause</button>
+    <button id="follow">Kamera folgen</button>
+    <button id="reset">Zurücksetzen</button>
+    <button id="build">Neu aufbauen</button>
+    <button id="sound">🔇 Ton</button>
+    <button id="dof">Tiefenschärfe</button>
+    <button id="rotate" class="on">Rotieren</button>
+  </div>
+</div>
+<div id="hint">Kugel antippen &amp; halten = anhalten · Kugel am Boden antippen = zurück nach oben · Ziehen = drehen · Rechtsklick = verschieben · Scrollen = zoomen</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
