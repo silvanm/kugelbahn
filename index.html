@@ -2,12 +2,15 @@
 <html lang="de">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Kugelbahn</title>
 <style>
   :root { --fg:#f4f1ea; --bg:#1b1d22; --accent:#d9a521; }
   html, body { margin:0; height:100%; overflow:hidden; background:var(--bg); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--fg); }
-  canvas { display:block; }
+  /* Touch: kein Markieren, kein Lupen-/Kontextmenü, kein Doppeltipp- oder Pinch-Zoom der Seite */
+  html, body { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+               -webkit-tap-highlight-color:transparent; touch-action:manipulation; overscroll-behavior:none; }
+  canvas { display:block; touch-action:none; }
   #hud { position:fixed; top:16px; left:16px; background:rgba(20,22,26,.72); backdrop-filter: blur(6px);
          padding:14px 16px; border-radius:12px; min-width:220px; box-shadow:0 6px 24px rgba(0,0,0,.35); }
   #hud h1 { margin:0 0 6px; font-size:18px; letter-spacing:.3px; }
@@ -83,6 +86,11 @@
     btn.onclick = () => set(!hud.classList.contains('collapsed'));
     set(matchMedia('(max-width: 700px), (max-height: 500px)').matches);
   })();
+  // iOS Safari ignoriert user-scalable=no: Seiten-Zoom per Pinch hier abfangen (Doppeltipp-Zoom
+  // verhindert touch-action:manipulation). Pinch auf dem Canvas bleibt Kamera-Zoom (OrbitControls).
+  for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('selectstart', (e) => e.preventDefault());
 </script>
 <script type="module" src="src/main.js"></script>
 </body>
