@@ -19,6 +19,22 @@
   button:hover { border-color:var(--accent); }
   button.on { background:var(--accent); color:#1b1d22; border-color:var(--accent); }
   #hint { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:12px; opacity:.6; }
+  #hud .head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  #hud .head h1 { margin:0; }
+  #hud .panel { margin-top:6px; }
+  #hudToggle { display:none; padding:4px 9px; font-size:15px; line-height:1; }
+  /* Kleine Bildschirme: Panel kompakter und ein-/ausklappbar, Hinweiszeile umbrechen */
+  @media (max-width: 700px), (max-height: 500px) {
+    #hud { top:8px; left:8px; right:8px; min-width:0; padding:10px 12px; }
+    #hud h1 { font-size:16px; }
+    #hud .btns { gap:5px; margin-top:8px; }
+    button { padding:6px 8px; font-size:12px; }
+    #hudToggle { display:block; }
+    #hud.collapsed { right:auto; }
+    #hud.collapsed .panel { display:none; }
+    #hint { width:calc(100% - 32px); text-align:center; font-size:11px; bottom:8px; }
+    body.hud-collapsed #hint { display:none; }
+  }
 </style>
 <script type="importmap">
 {
@@ -32,7 +48,11 @@
 </head>
 <body>
 <div id="hud">
-  <h1>Kugelbahn</h1>
+  <div class="head">
+    <h1>Kugelbahn</h1>
+    <button id="hudToggle" aria-expanded="true" aria-controls="hudPanel" title="Bedienfeld ein-/ausblenden">✕</button>
+  </div>
+  <div class="panel" id="hudPanel">
   <div class="row">Kugeln: <b id="nBalls">0</b></div>
   <div class="row">Lift: <b id="phase">–</b></div>
   <div class="row">Runden: <b id="laps">0</b></div>
@@ -46,9 +66,24 @@
     <button id="dof">Tiefenschärfe</button>
     <button id="rotate" class="on">Rotieren</button>
   </div>
+  </div>
 </div>
 <div id="hint">Kugel antippen &amp; halten = anhalten · Kugel am Boden antippen = zurück nach oben · Ziehen = drehen · Rechtsklick = verschieben · Scrollen = zoomen</div>
 
+<script>
+  // Bedienfeld ein-/ausklappen (nur auf kleinen Bildschirmen sichtbar). Dort startet es eingeklappt.
+  (() => {
+    const hud = document.getElementById('hud'), btn = document.getElementById('hudToggle');
+    const set = (collapsed) => {
+      hud.classList.toggle('collapsed', collapsed);
+      document.body.classList.toggle('hud-collapsed', collapsed);
+      btn.textContent = collapsed ? '☰' : '✕';
+      btn.setAttribute('aria-expanded', String(!collapsed));
+    };
+    btn.onclick = () => set(!hud.classList.contains('collapsed'));
+    set(matchMedia('(max-width: 700px), (max-height: 500px)').matches);
+  })();
+</script>
 <script type="module" src="src/main.js"></script>
 </body>
 </html>
