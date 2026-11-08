@@ -1,4 +1,4 @@
-// Grundplatte (Birken-Sperrholz) und Tisch (Nussbaum) mit prozeduralen Holztexturen
+// Grundplatte (schwarz gebeiztes Sperrholz) und Tisch (Nussbaum) mit prozeduralen Holztexturen
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { renderer, scene, world, ballMat } from './core.js';
@@ -49,13 +49,14 @@ function woodTextures({ light, dark, rings, size = 1024, planks = 0, warpAmp = 1
 function plyEdgeTexture() {
   const c = document.createElement('canvas'); c.width = 256; c.height = 64;
   const x = c.getContext('2d');
-  for (let i = 0; i < 9; i++) { x.fillStyle = i % 2 ? '#b8916a' : '#d9bf98'; x.fillRect(0, (i * 64) / 9, 256, 64 / 9 + 1); }
+  // Schnittkante: die Furnierlagen bleiben heller als die gebeizte Oberfläche
+  for (let i = 0; i < 9; i++) { x.fillStyle = i % 2 ? '#7a6550' : '#a08a6c'; x.fillRect(0, (i * 64) / 9, 256, 64 / 9 + 1); }
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace; t.wrapS = THREE.RepeatWrapping;
   return t;
 }
 
-// Grundplatte aus Birken-Sperrholz unter der ganzen Bahn, auf einem Nussbaum-Tisch.
+// Grundplatte aus gebeiztem Birken-Sperrholz unter der ganzen Bahn, auf einem Nussbaum-Tisch.
 // Oberkante der Platte = y 0, damit die Physik (Bodenebene) unverändert bleibt.
 const BASE_T = 0.16;
 function makeBase() {
@@ -63,7 +64,8 @@ function makeBase() {
   scene.traverse((o) => { if (o.isMesh && !o.userData.noBase) bb.expandByObject(o); });
   const x0 = bb.min.x - 0.6, x1 = bb.max.x + 0.6, z0 = bb.min.z - 0.6, z1 = bb.max.z + 0.6;
   const w = x1 - x0, d = z1 - z0;
-  const birch = woodTextures({ light: [226, 202, 164], dark: [190, 152, 108], rings: 34, warpAmp: 0.45, lateAmp: 0.32 });
+  // dunkel gebeizt: die hellen Acrylteile und Kugeln heben sich besser ab, die Maserung bleibt sichtbar
+  const birch = woodTextures({ light: [62, 56, 52], dark: [34, 30, 28], rings: 34, warpAmp: 0.45, lateAmp: 0.45 });
   birch.map.repeat.set(w / 6, d / 6); birch.rough.repeat.copy(birch.map.repeat);
   const top = new THREE.MeshStandardMaterial({ map: birch.map, roughnessMap: birch.rough, roughness: 1, color: 0xffffff });
   const edge = plyEdgeTexture();
