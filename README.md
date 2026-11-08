@@ -25,11 +25,12 @@ Nur an `127.0.0.1` binden: der einfache Python-Server liefert jede Datei im Ordn
 | `materials.js` | Acryl-Shader mit Gebrauchsspuren, Metalle, Kunststoffe |
 | `geometry.js` | Bauteil-Helfer: Boxen, Trimesh-Gitter, Rohre, Pfosten mit Fuss, Halbrohr-Rinnen, Rampen |
 | `track.js` | Bahn: Sammelrinne, Einlauf + Helix, Weiche, Äste, Trichter, Drahtschienen mit Looping und Schanze |
+| `chimes.js` | Klangrinne (13 gestimmte Stäbe), Kehre und Rücklaufrinne zum Lift; löst die Stabtöne aus |
 | `bell.js` | Glocke als Pendel am Faden |
 | `base.js` | Grundplatte und Tisch mit prozeduralen Holztexturen |
 | `lift.js` | Kippkübel-Lift mit Zahnriemen und Klappe (kinematisch, alles aus der Schlittenhöhe) |
 | `balls.js` | Kugeln erzeugen, in den Einlauf fallen lassen, vom Tisch zurückholen |
-| `audio.js` | Web Audio: Rollgeräusche, Stösse, Liftmotor, Glocke |
+| `audio.js` | Web Audio: Rollgeräusche, Stösse, Liftmotor, Glocke, synthetische Klangstäbe |
 | `interaction.js` | Kugel antippen & halten, Kugel am Boden antippen |
 | `lights.js` | LED-Licht (umschaltbar): Abendstimmung, LED-Streifen und -Ringe, leuchtende Murmeln |
 | `ballcam.js` | Kugelkamera: fährt hinter einer Kugel mit, Blick in Fahrtrichtung |

@@ -6,6 +6,7 @@ import { rocker } from './track.js';
 import { bell } from './bell.js';
 import { woodBodies } from './base.js';
 import { tray, lift } from './lift.js';
+import { chimes } from './chimes.js';
 
 // Klänge aus sounds/ (mit ElevenLabs generiert). Jede Kugel hat zwei Roll-Schleifen (Acryl, Draht), deren
 // Lautstärke und Tonhöhe ihrer Geschwindigkeit folgen; Stösse lösen kurze Einzelklänge aus. Lautstärke und
@@ -77,6 +78,31 @@ function play(name, gain, rate, pos) {
   src.connect(g).connect(p).connect(audio.master);
   src.start();
 }
+
+// Klangstab der Klangrinne: Metallophon-Ton synthetisch (Teiltöne eines frei schwingenden Stabs,
+// die hohen klingen schneller ab), dazu ein kurzer Anschlag
+const BAR_PARTIALS = [[1, 1, 1.8], [2.756, 0.32, 0.55], [5.404, 0.12, 0.22], [8.933, 0.05, 0.1]];   // [Verhältnis, Pegel, Abklingzeit s]
+chimes.onHit = (freq, gain, pos) => {
+  if (!audio.on || !audio.ready) return;
+  const ctx = audio.ctx, t = ctx.currentTime;
+  const { k, pan } = spatial(pos);
+  const out = ctx.createGain(), p = ctx.createStereoPanner();
+  out.gain.value = Math.min(1.2, gain * k * 0.55);
+  p.pan.value = pan;
+  out.connect(p).connect(audio.master);
+  for (const [ratio, amp, dec] of BAR_PARTIALS) {
+    const f = freq * ratio;
+    if (f > 16000) continue;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = f;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(amp, t + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dec * (1.2 - 0.4 * Math.min(1, freq / 2000)));
+    o.connect(g).connect(out);
+    o.start(t); o.stop(t + dec * 1.2 + 0.05);
+  }
+  play(CLICKS[(Math.random() * 3) | 0], gain * 0.12, 1.6, pos);   // weicher Anschlag der Kugel
+};
 
 // Kugel trifft die Glocke
 let bellT = -1;

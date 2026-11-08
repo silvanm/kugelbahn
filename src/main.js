@@ -5,6 +5,7 @@ import * as CANNON from 'cannon-es';
 import { R, H, renderer, scene, camera, controls, world, sync, balls, state } from './core.js';
 import { acrylicDepth } from './materials.js';
 import { FUN, Y_FUN_RIM, LOOP, KICK, FUN2, rocker, rockerMesh, railPts, RAIL_BOX, railConstraint } from './track.js';
+import { onChimes, chimesStep, updateChimes } from './chimes.js';
 import { bell, bellPreStep, bellPostStep, syncBell } from './bell.js';
 import { makeBase } from './base.js';
 import { tray, trayMesh, gate, gateMesh, lift, PH, driveKinematics, syncLiftVisuals, advanceLift } from './lift.js';
@@ -36,7 +37,7 @@ function funnelDamping() {
     const inFunnel = Math.hypot(p.x - FUN.x, p.z - FUN.z) < FUN.rOut && p.y > FUN.yHole - 0.1 && p.y < Y_FUN_RIM + R + 0.1;
     const onRails = RAIL_BOX.containsPoint(tmp.set(p.x, p.y, p.z));
     const onWood = p.y < R + 0.05 && !(p.x > 2.3 && p.x < 4.3 && Math.abs(p.z) < 0.65);   // auf Platte/Tisch, nicht in der Liftschale
-    body.linearDamping = inFunnel ? 0.04 : onRails ? 0.02 : onWood ? 0.7 : 0.25;   // Holz bremst stärker als glattes Acryl
+    body.linearDamping = inFunnel ? 0.04 : onRails ? 0.02 : onChimes(p) ? 0.12 : onWood ? 0.7 : 0.25;   // Holz bremst stärker als glattes Acryl
   }
 }
 
@@ -47,6 +48,7 @@ function physicsStep() {
   bellPreStep();
   world.step(H);
   bellPostStep();
+  chimesStep();
   audioContacts();
   railConstraint();
   advanceLift();
@@ -123,6 +125,7 @@ renderer.setAnimationLoop(() => {
   $('phase').textContent = PH[lift.ph].label;
   $('laps').textContent = state.laps;
   updateLights(dt, clock.elapsedTime, building());
+  updateChimes(dt, led.mix);
   updateFocus();
   assemblyApply(dt);
   composer.render();

@@ -2,13 +2,11 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { R, T, Y_TOP, H, scene, world, trackMat, V, balls } from './core.js';
+import { R, Y_TOP, H, scene, world, trackMat, V, balls } from './core.js';
 import { plasticMat, acrylicDepth, edgeMat, railMat, steelMat, rimMat, funnelMat, wireMat } from './materials.js';
-import { addBox, makeRamp, addGrid, addMesh, gridIndices, addTube, addPost, makeTrough, RC } from './geometry.js';
+import { addBox, addGrid, addMesh, gridIndices, addTube, addPost, makeTrough, RC } from './geometry.js';
 
-// Sammelrinne unten (unter dem Trichter), führt zum Lift
-makeRamp({ xHigh: -3.0, xLow: 2.3, yHigh: 1.05, drop: 0.4, wallHigh: true, wallH: 0.6, rh: 0.6 });   // hohe Schienen: hier staut sich die Warteschlange
-for (const x of [-2.6, -0.4, 1.8]) for (const z of [-0.25, 0.25]) addPost(x, z, 1.05 - ((x + 3) * 0.4) / 5.3 - T, 0.03);   // Stützen der Sammelrinne
+// Die Sammelrinne zum Lift liegt jetzt in chimes.js (Klangrinne, Kehre, Rückweg)
 
 // Höhenplan
 const HELIX = { x: 0, z: -1.3, r: 1.3, turns: 2, pitch: 0.75 };
@@ -124,7 +122,8 @@ function makeBranch(ctrl, y0, y1) {
 }
 
 // 4) Trichter: Profil ~ 1/r wie ein Gravitationstrichter, darunter ein kurzes Auslaufrohr
-function makeFunnel(F, wallH, NA = 72, NR = 24) {
+// posts: Winkel der Stützen (rad, gemessen von +x Richtung +z); hinten verläuft der Rückweg zum Lift
+function makeFunnel(F, wallH, posts, NA = 72, NR = 24) {
   const rim = F.yHole + F.depth;
   const fy = (r) => F.yHole + (F.depth * (1 - F.rIn / r)) / (1 - F.rIn / F.rOut);
   const ring = (r, y, out) => { for (let m = 0; m < NA; m++) { const a = (m / NA) * Math.PI * 2; out.push(F.x + r * Math.cos(a), y, F.z + r * Math.sin(a)); } };
@@ -139,9 +138,9 @@ function makeFunnel(F, wallH, NA = 72, NR = 24) {
     const pts = []; for (let m = 0; m <= NA; m++) { const a = (m / NA) * Math.PI * 2; pts.push(V(F.x + (y === F.yTube ? F.rIn : F.rOut) * Math.cos(a), y, F.z + (y === F.yTube ? F.rIn : F.rOut) * Math.sin(a))); }
     addTube(pts, 0.035, edgeMat);
   }
-  for (let k = 0; k < 4; k++) { const a = Math.PI / 4 + (k * Math.PI) / 2; addPost(F.x + F.rOut * Math.cos(a), F.z + F.rOut * Math.sin(a), rim); }
+  for (const a of posts) addPost(F.x + F.rOut * Math.cos(a), F.z + F.rOut * Math.sin(a), rim);
 }
-makeFunnel(FUN, 0.25);
+makeFunnel(FUN, 0.25, [Math.PI / 4, (3 * Math.PI) / 4, Math.PI]);
 
 // 5) Neuer Unterbau: Auffangrinne unter dem Trichter -> Drahtschienen -> Kehre -> Steilabfahrt -> Looping -> Schanze -> Fangtrichter
 const Y_C0 = 4.45, C_SLOPE = 0.2;             // Auffangrinne: Anfang (z=-0.6) und Gefälle (steil genug, dass die Kugel unter der Säule im Rohr wegrollt)
@@ -151,7 +150,7 @@ const KICK = { len: 0.7, angle: THREE.MathUtils.degToRad(20), zLip: 2.3 };
 LOOP.z = KICK.zLip + KICK.len + 0.15;        // Looping-Einfahrt (Fahrtrichtung -z)
 const U_TURN = { x: -1.45, z: LOOP.z + 1.8, r: 0.95 };
 const X_J = LOOP.x + LOOP.shift;             // Spur nach dem Looping / Mitte Fangtrichter
-const FUN2 = { x: X_J, z: 0, rIn: 0.48, rOut: 1.0, yHole: 1.85, depth: 0.3, yTube: 1.5 };
+const FUN2 = { x: X_J, z: 0, rIn: 0.48, rOut: 1.0, yHole: 1.85, depth: 0.3, yTube: 1.75 };   // kurzer Auslauf: darunter liegt die Klangrinne
 
 // Auffangrinne direkt unter dem Trichterauslauf (Acryl-Halbrohr mit Endwand)
 {
@@ -256,8 +255,8 @@ const RAIL = { U: null, C: null };
   for (let i = 0; i < n; i += 14) if (i < loopFrom.i || i >= loopTo.i) addPost(railPts[i].x, railPts[i].z, railPts[i].y - 0.04, 0.022);
   for (const x of [LOOP.x, X_J]) addPost(x, LOOP.z, LOOP.y - 0.04, 0.03);
 }
-// Fangtrichter hinter der Schanze, sein Auslauf fällt in die Sammelrinne
-makeFunnel(FUN2, 0.35, 56, 18);
+// Fangtrichter hinter der Schanze, sein Auslauf fällt auf die Klangrinne
+makeFunnel(FUN2, 0.35, [Math.PI / 4, (3 * Math.PI) / 4, 0], 56, 18);
 // Zonen mit wenig Rollwiderstand (Stahldraht, glatter Trichter)
 const RAIL_BOX = new THREE.Box3().setFromPoints(railPts).expandByScalar(0.45);
 
