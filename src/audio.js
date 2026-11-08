@@ -87,7 +87,8 @@ chimes.onHit = (freq, gain, pos) => {
   const ctx = audio.ctx, t = ctx.currentTime;
   const { k, pan } = spatial(pos);
   const out = ctx.createGain(), p = ctx.createStereoPanner();
-  out.gain.value = Math.min(1.2, gain * k * 0.55);
+  // leiser als die übrigen Klänge; hohe Töne wirken lauter und werden etwas zurückgenommen
+  out.gain.value = Math.min(0.6, gain * k * 0.28 * Math.sqrt(523 / freq) ** 0.5);
   p.pan.value = pan;
   out.connect(p).connect(audio.master);
   for (const [ratio, amp, dec] of BAR_PARTIALS) {
