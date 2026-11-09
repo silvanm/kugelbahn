@@ -13,7 +13,7 @@ import { chimes } from './chimes.js';
 // Stereo-Position hängen von der Lage zur Kamera ab.
 const SND = ['roll_acrylic', 'roll_rail', 'motor', 'click1', 'click2', 'click3', 'impact', 'rattle', 'switch', 'bell'];
 const CLICKS = ['click1', 'click2', 'click3'];
-const audio = { on: false, ready: false, ctx: null, buf: {}, master: null, voices: new Map(), motor: null, win: 0, n: 0 };
+const audio = { on: true, ready: false, ctx: null, buf: {}, master: null, voices: new Map(), motor: null, win: 0, n: 0 };
 let simTime = 0;
 const _sv = new THREE.Vector3();
 
@@ -31,11 +31,22 @@ async function audioInit() {
   audio.motor = loopVoice('motor');
   audio.ready = true;
 }
+// Nur Klänge erzeugen, wenn der Kontext läuft: sonst stauen sie sich und erklingen alle auf einmal beim Start
+const live = () => audio.on && audio.ready && audio.ctx.state === 'running';
 function audioSuspend() {
   if (!audio.ctx) return;
   if (audio.on && !state.paused && !document.hidden) audio.ctx.resume(); else audio.ctx.suspend();
 }
 document.addEventListener('visibilitychange', audioSuspend);
+// Ton ist standardmässig an. Browser lassen Audio aber erst nach einer Bedienung zu: Kontext und Klänge
+// gleich laden, beim ersten Tippen/Klicken/Tastendruck irgendwo auf der Seite starten.
+audioInit();
+const UNLOCK = ['pointerdown', 'touchend', 'keydown'];
+function unlock() {
+  audioSuspend();
+  for (const ev of UNLOCK) removeEventListener(ev, unlock, true);
+}
+for (const ev of UNLOCK) addEventListener(ev, unlock, true);
 async function toggleSound() {
   audio.on = !audio.on;
   if (audio.on && !audio.ctx) await audioInit();
@@ -65,7 +76,7 @@ function setVoice(v, gain, rate, pan, t) {
   v.pan.pan.setTargetAtTime(pan, t, 0.05);
 }
 function play(name, gain, rate, pos) {
-  if (!audio.on || !audio.ready) return;
+  if (!live()) return;
   const ctx = audio.ctx, now = ctx.currentTime;
   if (now - audio.win > 0.1) { audio.win = now; audio.n = 0; }
   if (++audio.n > 12) return;   // höchstens 12 Einzelklänge pro 100 ms (Kugelhaufen im Lift)
@@ -83,7 +94,7 @@ function play(name, gain, rate, pos) {
 // die hohen klingen schneller ab), dazu ein kurzer Anschlag
 const BAR_PARTIALS = [[1, 1, 1.8], [2.756, 0.32, 0.55], [5.404, 0.12, 0.22], [8.933, 0.05, 0.1]];   // [Verhältnis, Pegel, Abklingzeit s]
 chimes.onHit = (freq, gain, pos) => {
-  if (!audio.on || !audio.ready) return;
+  if (!live()) return;
   const ctx = audio.ctx, t = ctx.currentTime;
   const { k, pan } = spatial(pos);
   const out = ctx.createGain(), p = ctx.createStereoPanner();
@@ -161,7 +172,7 @@ function audioContacts() {
 // Pro Frame: Roll-Schleifen und Liftmotor nachführen
 const _rv = new CANNON.Vec3();
 function audioUpdate() {
-  if (!audio.on || !audio.ready) return;
+  if (!live()) return;
   const t = audio.ctx.currentTime;
   for (const ball of balls) {
     let v = audio.voices.get(ball);
