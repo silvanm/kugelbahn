@@ -48,6 +48,13 @@ Wichtig:
 - **Klänge:** Die Dateien in `sounds/` wurden mit der ElevenLabs Sound-Effects-API erzeugt. Der API-Key steht
   in `.env` und wird von der App nicht gebraucht.
 
+## Deployen
+
+GitHub Pages (Branch `main`). Vor jedem Commit `task stamp` laufen lassen (oder `python3 tools/stamp.py`):
+das Skript trägt für jedes Modul einen Inhalts-Hash in die Import-Map von `index.html` ein
+(`./src/x.js` → `./src/x.js?v=…`). Pages liefert Dateien mit 10 Minuten Cache aus. Ohne Versionen kann der
+Browser eine neue `index.html` mit alten Modulen mischen.
+
 ## Debug
 
 In der Browser-Konsole:

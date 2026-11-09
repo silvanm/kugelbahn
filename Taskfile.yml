@@ -1,0 +1,9 @@
+version: '3'
+
+tasks:
+  serve:
+    desc: Lokaler Server (nur 127.0.0.1, sonst wäre .env erreichbar)
+    cmd: python3 -m http.server 8765 --bind 127.0.0.1
+  stamp:
+    desc: Modulversionen in index.html aktualisieren (vor jedem Commit)
+    cmd: python3 tools/stamp.py
