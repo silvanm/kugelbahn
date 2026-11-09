@@ -35,7 +35,7 @@ Nur an `127.0.0.1` binden: der einfache Python-Server liefert jede Datei im Ordn
 | `lights.js` | LED-Licht (umschaltbar): Abendstimmung, LED-Streifen und -Ringe, leuchtende Murmeln |
 | `ballcam.js` | Kugelkamera: fährt hinter einer Kugel mit, Blick in Fahrtrichtung |
 | `assembly.js` | Aufbau-Animation beim Start |
-| `postfx.js` | Kontaktschatten (GTAO), Tiefenschärfe (Bokeh), Leuchten (Bloom) |
+| `postfx.js` | Kontaktschatten (GTAO), Leuchten (Bloom) |
 
 Wichtig:
 

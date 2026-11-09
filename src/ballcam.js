@@ -60,7 +60,6 @@ function place(snap, dt = 0) {
   look.y += vy * 0.12 - R * 0.5;
   if (snap) lookS.copy(look); else lookS.lerp(look, 1 - Math.exp(-dt * 8));
   camera.lookAt(lookS);
-  controls.target.copy(p);   // für den Autofokus der Tiefenschärfe
 }
 
 // Pro Bild aufrufen (anstelle von controls.update)

@@ -13,7 +13,7 @@ import { spawner, spawnStep, respawnStray, clearBalls } from './balls.js';
 import { audio, audioSuspend, toggleSound, audioContacts, audioUpdate } from './audio.js';
 import { held } from './interaction.js';
 import { startAssembly, building, assemblyApply, assemblyRestore } from './assembly.js';
-import { composer, bokeh, updateFocus } from './postfx.js';
+import { composer } from './postfx.js';
 import { led, makeLights, setLed, updateLights } from './lights.js';
 import { cam, enableBallCam, disableBallCam, nextBallCam, updateBallCam } from './ballcam.js';
 
@@ -83,7 +83,6 @@ $('sound').onclick = async (e) => {
   e.target.classList.toggle('on', on);
   e.target.textContent = on ? '🔊 Ton' : '🔇 Ton';
 };
-$('dof').onclick = (e) => { bokeh.enabled = !bokeh.enabled; e.target.classList.toggle('on', bokeh.enabled); };
 $('rotate').onclick = (e) => { controls.autoRotate = !controls.autoRotate; e.target.classList.toggle('on', controls.autoRotate); };
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
@@ -126,7 +125,6 @@ renderer.setAnimationLoop(() => {
   $('laps').textContent = state.laps;
   updateLights(dt, clock.elapsedTime, building());
   updateChimes(dt, led.mix);
-  updateFocus();
   assemblyApply(dt);
   composer.render();
   assemblyRestore();
