@@ -22,6 +22,16 @@
   button:hover { border-color:var(--accent); }
   button[hidden] { display:none; }
   button.on { background:var(--accent); color:#1b1d22; border-color:var(--accent); }
+  #hud { z-index:2; }
+  #start { position:fixed; inset:0; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+           background:radial-gradient(ellipse at center, rgba(10,11,14,.15), rgba(10,11,14,.6)); }
+  #start[hidden] { display:none; }
+  #startBtn { font-size:22px; font-weight:600; padding:18px 34px; border-radius:999px; background:var(--accent); color:#1b1d22;
+              border:none; box-shadow:0 10px 40px rgba(217,165,33,.35), 0 4px 14px rgba(0,0,0,.4); cursor:pointer;
+              animation:pulse 2.4s ease-in-out infinite; }
+  #startBtn:hover { filter:brightness(1.08); }
+  #start p { margin:0; font-size:13px; opacity:.7; }
+  @keyframes pulse { 50% { transform:scale(1.04); box-shadow:0 14px 54px rgba(217,165,33,.5), 0 4px 14px rgba(0,0,0,.4); } }
   #hint { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:12px; opacity:.6; }
   #hud .head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
   #hud .head h1 { margin:0; }
@@ -74,6 +84,7 @@
   </div>
   </div>
 </div>
+<div id="start"><button id="startBtn">▶ Kugelbahn aufbauen</button><p>mit Ton 🔊</p></div>
 <div id="hint">Kugel antippen &amp; halten = anhalten · Kugel am Boden antippen = zurück nach oben · Ziehen = drehen · Rechtsklick = verschieben · Scrollen = zoomen</div>
 
 <script>

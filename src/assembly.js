@@ -9,8 +9,10 @@ import { play } from './audio.js';
 // Beim Start wird die Bahn in ~10 s zusammengesetzt: zuerst die Grundplatte auf den Tisch, dann die Teile von
 // unten nach oben (Pfosten, Bahnen, Liftgestell), danach die beweglichen Teile und zuletzt die Glocke.
 // Jedes Teil senkt sich von oben an seinen Platz. Der Versatz wirkt nur beim Zeichnen; die Physik ruht so lange.
-const asm = { t: 0, end: 0, items: [] };
-function startAssembly() {
+// wait: alles ausgeblendet, die Animation beginnt erst mit releaseAssembly() (Startknopf)
+const asm = { t: 0, end: 0, items: [], wait: false };
+function startAssembly(wait = false) {
+  asm.wait = wait;
   const late = new Set([trayMesh, gateMesh, carriage, crank, pedal, rockerMesh]);
   const last = new Set([bellMesh, bellThread]);
   const box = new THREE.Box3(), parts = [], moving = [], bellParts = [];
@@ -41,7 +43,7 @@ const building = () => asm.t < asm.end;
 // vor dem Zeichnen: Teile einblenden und anheben; nach dem Zeichnen wieder zurück
 function assemblyApply(dt) {
   if (!building()) return;
-  if (!state.paused) asm.t += dt;
+  if (!state.paused && !asm.wait) asm.t += dt;
   const _p = new THREE.Vector3();
   for (const it of asm.items) {
     const u = (asm.t - it.t0) / it.dur;
@@ -60,4 +62,6 @@ function assemblyRestore() {
   for (const it of asm.items) { it.o.position.y -= it.dy; it.dy = 0; }
 }
 
-export { startAssembly, building, assemblyApply, assemblyRestore };
+const releaseAssembly = () => { asm.wait = false; };
+
+export { startAssembly, releaseAssembly, building, assemblyApply, assemblyRestore };

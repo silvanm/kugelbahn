@@ -12,7 +12,7 @@ import { tray, trayMesh, gate, gateMesh, lift, PH, driveKinematics, syncLiftVisu
 import { spawner, spawnStep, respawnStray, clearBalls } from './balls.js';
 import { audio, audioSuspend, toggleSound, audioContacts, audioUpdate } from './audio.js';
 import { held } from './interaction.js';
-import { startAssembly, building, assemblyApply, assemblyRestore } from './assembly.js';
+import { startAssembly, releaseAssembly, building, assemblyApply, assemblyRestore } from './assembly.js';
 import { composer } from './postfx.js';
 import { led, makeLights, setLed, updateLights } from './lights.js';
 import { cam, enableBallCam, disableBallCam, nextBallCam, updateBallCam } from './ballcam.js';
@@ -77,7 +77,7 @@ $('led').onclick = () => { setLed(!led.on); $('led').classList.toggle('on', led.
 $('ballcam').onclick = () => setBallCam(!cam.active);
 $('nextBall').onclick = () => nextBallCam();
 addEventListener('keydown', (e) => { if (e.key === 'Escape' && cam.active) setBallCam(false); });
-$('build').onclick = () => { setBallCam(false); reset(); startAssembly(); };
+$('build').onclick = () => { $('start').hidden = true; setBallCam(false); reset(); startAssembly(); };
 $('sound').onclick = async (e) => {
   const on = await toggleSound();
   e.target.classList.toggle('on', on);
@@ -93,7 +93,9 @@ addEventListener('resize', () => {
 
 // ---------------------------------------------------------------- Loop
 reset();
-startAssembly();
+// Startknopf: Browser spielen Ton erst nach einer Bedienung ab. Der Klick startet Ton und Aufbau zugleich.
+startAssembly(true);
+$('startBtn').onclick = () => { $('start').hidden = true; audioSuspend(); releaseAssembly(); };
 // Debug-Zugriff (z. B. __kb.fastForward(60) simuliert 60 s ohne Rendering)
 window.__kb = { finishAssembly: () => { assemblyApply(1e3); assemblyRestore(); }, led, setLed, updateLights, cam, updateBallCam, bell, composer, renderer, audio, world, CANNON, camera, controls, scene, acrylicDepth, balls, lift, rocker, railPts, LOOP, KICK, FUN2, get laps() { return state.laps; }, fastForward: (s) => { for (let i = 0; i < s / H; i++) physicsStep(); } };
 const clock = new THREE.Clock();
