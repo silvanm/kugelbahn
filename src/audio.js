@@ -17,6 +17,13 @@ const audio = { on: true, ready: false, ctx: null, buf: {}, master: null, voices
 let simTime = 0;
 const _sv = new THREE.Vector3();
 
+// Rohdaten der Klänge schon beim Laden holen; dekodiert wird erst, wenn der Kontext existiert
+const raw = Promise.all(SND.map((n) => fetch(`sounds/${n}.wav`).then((r) => r.arrayBuffer())));
+// iOS: Web Audio auch bei Stummschalter wiedergeben (Safari 16.4+), wie ein Video statt wie ein Klingelton
+if (navigator.audioSession) navigator.audioSession.type = 'playback';
+
+// Der Kontext muss auf iOS innerhalb einer Bedienung entstehen und gestartet werden, sonst bleibt er stumm.
+// Der Teil bis zum ersten await läuft darum synchron im Klick.
 async function audioInit() {
   const ctx = audio.ctx = new AudioContext();
   const comp = ctx.createDynamicsCompressor();
@@ -24,10 +31,12 @@ async function audioInit() {
   audio.master = ctx.createGain();
   audio.master.gain.value = 0.8;
   audio.master.connect(comp).connect(ctx.destination);
-  await Promise.all(SND.map(async (n) => {
-    const r = await fetch(`sounds/${n}.wav`);
-    audio.buf[n] = await ctx.decodeAudioData(await r.arrayBuffer());
-  }));
+  ctx.resume();
+  // stiller Puffer: schaltet die Wiedergabe auf älteren iOS-Versionen frei
+  const s = ctx.createBufferSource();
+  s.buffer = ctx.createBuffer(1, 1, 22050); s.connect(ctx.destination); s.start();
+  const data = await raw;
+  await Promise.all(SND.map(async (n, i) => { audio.buf[n] = await ctx.decodeAudioData(data[i].slice(0)); }));
   audio.motor = loopVoice('motor');
   audio.ready = true;
 }
@@ -38,15 +47,18 @@ function audioSuspend() {
   if (audio.on && !state.paused && !document.hidden) audio.ctx.resume(); else audio.ctx.suspend();
 }
 document.addEventListener('visibilitychange', audioSuspend);
-// Ton ist standardmässig an. Browser lassen Audio aber erst nach einer Bedienung zu: Kontext und Klänge
-// gleich laden, beim ersten Tippen/Klicken/Tastendruck irgendwo auf der Seite starten.
-audioInit();
-const UNLOCK = ['pointerdown', 'touchend', 'keydown'];
-function unlock() {
-  audioSuspend();
-  for (const ev of UNLOCK) removeEventListener(ev, unlock, true);
+// Ton ist standardmässig an, startet aber erst mit einer Bedienung (Startknopf oder irgendein Klick/Tipp).
+// touchend/click/keydown zählen auf iOS als Freigabe, pointerdown/touchstart nicht.
+const UNLOCK = ['touchend', 'click', 'keydown'];
+function audioUnlock() {
+  if (!audio.on) return;
+  if (!audio.ctx) audioInit(); else audioSuspend();
+  if (audio.ctx.state === 'running') for (const ev of UNLOCK) removeEventListener(ev, audioUnlock, true);
+  else audio.ctx.addEventListener('statechange', () => {
+    if (audio.ctx.state === 'running') for (const ev of UNLOCK) removeEventListener(ev, audioUnlock, true);
+  }, { once: true });
 }
-for (const ev of UNLOCK) addEventListener(ev, unlock, true);
+for (const ev of UNLOCK) addEventListener(ev, audioUnlock, true);
 async function toggleSound() {
   audio.on = !audio.on;
   if (audio.on && !audio.ctx) await audioInit();
@@ -198,4 +210,4 @@ function audioUpdate() {
   setVoice(audio.motor, moving ? 0.3 * m.k : 0, lift.ph === 'up' ? 0.95 : 1.08, m.pan, t);   // bergauf mit Last etwas tiefer
 }
 
-export { audio, audioSuspend, toggleSound, play, audioContacts, audioUpdate };
+export { audio, audioSuspend, audioUnlock, toggleSound, play, audioContacts, audioUpdate };

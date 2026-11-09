@@ -10,7 +10,7 @@ import { bell, bellPreStep, bellPostStep, syncBell } from './bell.js';
 import { makeBase } from './base.js';
 import { tray, trayMesh, gate, gateMesh, lift, PH, driveKinematics, syncLiftVisuals, advanceLift } from './lift.js';
 import { spawner, spawnStep, respawnStray, clearBalls } from './balls.js';
-import { audio, audioSuspend, toggleSound, audioContacts, audioUpdate } from './audio.js';
+import { audio, audioSuspend, audioUnlock, toggleSound, audioContacts, audioUpdate } from './audio.js';
 import { held } from './interaction.js';
 import { startAssembly, releaseAssembly, building, assemblyApply, assemblyRestore } from './assembly.js';
 import { composer } from './postfx.js';
@@ -95,7 +95,7 @@ addEventListener('resize', () => {
 reset();
 // Startknopf: Browser spielen Ton erst nach einer Bedienung ab. Der Klick startet Ton und Aufbau zugleich.
 startAssembly(true);
-$('startBtn').onclick = () => { $('start').hidden = true; audioSuspend(); releaseAssembly(); };
+$('startBtn').onclick = () => { $('start').hidden = true; audioUnlock(); releaseAssembly(); };
 // Debug-Zugriff (z. B. __kb.fastForward(60) simuliert 60 s ohne Rendering)
 window.__kb = { finishAssembly: () => { assemblyApply(1e3); assemblyRestore(); }, led, setLed, updateLights, cam, updateBallCam, bell, composer, renderer, audio, world, CANNON, camera, controls, scene, acrylicDepth, balls, lift, rocker, railPts, LOOP, KICK, FUN2, get laps() { return state.laps; }, fastForward: (s) => { for (let i = 0; i < s / H; i++) physicsStep(); } };
 const clock = new THREE.Clock();
